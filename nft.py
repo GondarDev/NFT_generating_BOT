@@ -185,20 +185,20 @@ def generate_images(edition, count, drop_dup=True):
     rarity_table = pd.DataFrame(rarity_table).drop_duplicates()
     print("Generated %i images, %i are distinct" % (count, rarity_table.shape[0]))
     
-    if drop_dup:
-        # Get list of duplicate images
-        img_tb_removed = sorted(list(set(range(count)) - set(rarity_table.index)))
+    # if drop_dup:
+    #     # Get list of duplicate images
+    #     img_tb_removed = sorted(list(set(range(count)) - set(rarity_table.index)))
 
-        # Remove duplicate images
-        print("Removing %i images..." % (len(img_tb_removed)))
+    #     # Remove duplicate images
+    #     print("Removing %i images..." % (len(img_tb_removed)))
 
-        #op_path = os.path.join('output', 'edition ' + str(edition))
-        for i in img_tb_removed:
-            os.remove(os.path.join(op_path, str(i) + '.png'))
+    #     #op_path = os.path.join('output', 'edition ' + str(edition))
+    #     for i in img_tb_removed:
+    #         os.remove(os.path.join(op_path, str(i) + '.png'))
 
-        # Rename images such that it is sequentialluy numbered
-        for idx, img in enumerate(sorted(os.listdir(op_path))):
-            os.rename(os.path.join(op_path, img), os.path.join(op_path, str(idx) + '.png'))
+    #     # Rename images such that it is sequentialluy numbered
+    #     for idx, img in enumerate(sorted(os.listdir(op_path))):
+    #         os.rename(os.path.join(op_path, img), os.path.join(op_path, str(idx) + '.png'))
     
     
     # Modify rarity table to reflect removals
