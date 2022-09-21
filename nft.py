@@ -9,14 +9,13 @@ import time
 import os
 import random
 from progressbar import progressbar
-
+import threading
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 # Import configuration file
 from config import CONFIG
-
 
 # Parse the configuration file and make sure it's valid
 def parse_config():
@@ -144,26 +143,16 @@ def generate_trait_set_from_config():
 
 
 # Generate the image set. Don't change drop_dup
-def generate_images(edition, count, drop_dup=True):
+def generate_images(edition,op_path, start,end, drop_dup=True):
     
     # Initialize an empty rarity table
     rarity_table = {}
     for layer in CONFIG:
         rarity_table[layer['name']] = []
-
-    # Define output path to output/edition {edition_num}
-    op_path = os.path.join('output', 'edition ' + str(edition), 'images')
-
-    # Will require this to name final images as 000, 001,...
-    zfill_count = len(str(count - 1))
-    
-    # Create output directory if it doesn't exist
-    if not os.path.exists(op_path):
-        os.makedirs(op_path)
       
     # Create the images
     progress = progressbar.ProgressBar()
-    for n in progress(range(count)):
+    for n in range(start,end):
         
         # Set image name
         image_name = str(n) + '.png'
@@ -182,8 +171,8 @@ def generate_images(edition, count, drop_dup=True):
                 rarity_table[CONFIG[idx]['name']].append('none')
     
     # Create the final rarity table by removing duplicate creat
-    rarity_table = pd.DataFrame(rarity_table).drop_duplicates()
-    print("Generated %i images, %i are distinct" % (count, rarity_table.shape[0]))
+    rarity_table = pd.DataFrame(rarity_table)
+    # print("Generated %i images, %i are distinct" % (count, rarity_table.shape[0]))
     
     # if drop_dup:
     #     # Get list of duplicate images
@@ -204,7 +193,12 @@ def generate_images(edition, count, drop_dup=True):
     # Modify rarity table to reflect removals
     rarity_table = rarity_table.reset_index()
     rarity_table = rarity_table.drop('index', axis=1)
-    return rarity_table
+
+    print("Saving metadata...")
+    extension = str(start/10)+'metadata.csv'
+    rarity_table.to_csv(os.path.join('output', 'edition ' + str(edition), extension))
+
+    # return rarity_table
 
 # Main function. Point of entry
 def main():
@@ -228,13 +222,22 @@ def main():
     edition_name = input()
 
     print("Starting task...")
-    rt = generate_images(edition_name, 50000)
 
-    print("Saving metadata...")
-    rt.to_csv(os.path.join('output', 'edition ' + str(edition_name), 'metadata.csv'))
+    # Define output path to output/edition {edition_num}
+    op_path = os.path.join('output', 'edition ' + str(edition_name), 'images')
 
-    print("Task complete!")
+    # Will require this to name final images as 000, 001,...
+    # zfill_count = len(str(count - 1))
+    
+    # Create output directory if it doesn't exist
+    if not os.path.exists(op_path):
+        os.makedirs(op_path)
 
+    threads = []
+    for k in range(8):
+        t = threading.Thread(target=generate_images, args=(edition_name,op_path,k*6250,(k+1)*6250))
+        threads.append(t)
+        t.start()
 
 # Run the main function
 main()
