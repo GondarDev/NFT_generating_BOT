@@ -234,8 +234,8 @@ def main():
         os.makedirs(op_path)
 
     threads = []
-    for k in range(8):
-        t = threading.Thread(target=generate_images, args=(edition_name,op_path,k*6250,(k+1)*6250))
+    for k in range(5):
+        t = threading.Thread(target=generate_images, args=(edition_name,op_path,k*10,(k+1)*10))
         threads.append(t)
         t.start()
 

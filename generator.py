@@ -4,7 +4,7 @@ import json
 import os
 op_path = os.path.join('./json')
 i = 0
-count = 2
+count = 3
 # progress = progressbar.ProgressBar()
 for n in range(count):
 	print("n", n)
